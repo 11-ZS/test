@@ -1,73 +1,106 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-   <head>
-      <meta charset="utf-8">
-      <title></title>
 
-      <style media="screen">
+<head>
+	<meta charset="utf-8">
+	<title></title>
 
-         .container{
+	<style media="screen">
+		.container {
 
-            border:1px solid red;
-            display:inline-flex;
-            flex-direction:column;
-            height:140px;
-            overflow:auto;
-         }
+			/* border: 1px solid red; */
+			display: inline-flex;
+			flex-direction: column;
+			height: 140px;
+			overflow: auto;
+		}
+	</style>
+</head>
 
-      </style>
-   </head>
-   <body>
+<body>
 
-      <div class="container">
-         <img src="https://www.w3cschool.cn/statics/codecamp/images/9H17QFk.png" alt="">
-         <img src="https://www.w3cschool.cn/statics/codecamp/images/9RmpXTy.png" alt="">
-         <img src="https://www.w3cschool.cn/statics/codecamp/images/VJnmtt5.png" alt="">
+	<div class="container">
+		<img src="https://www.w3cschool.cn/statics/codecamp/images/9H17QFk.png" alt="">
+		<img src="https://www.w3cschool.cn/statics/codecamp/images/9RmpXTy.png" alt="">
+		<img src="https://www.w3cschool.cn/statics/codecamp/images/VJnmtt5.png" alt="">
 
-      </div>
-      <button class="go">go</button>
-      <script type="text/javascript">
-         var container = document.querySelector('.container')
-         var go = document.querySelector('.go');
-         var stepTime = 10;
-         let children = container.children;
-          container.children = [children[1],children[2],children[0]]
-          console.dir(container)
+	</div>
+	<button class="go">go</button>
+	<script type="text/javascript">
+		var container = document.querySelector('.container')
+		var go = document.querySelector('.go');
+		
+		let children = container.children;
 
-         function animation(target,action,time){
-            for(let key in action){
-               let [from,to]=action[key]
-               let step = (to-from)/(time*1000/stepTime);
-               console.log(step)
-               let timeKey = setInterval(function(){
-                  target[key] +=step;
-                  // console.log(target[key])
-                  if(target[key]>=to){
-                     // clearInterval(timeKey);
+		let firstSrc = children[0].src;
+		for (let i = 0; i < children.length - 1; i++) {
+			children[i].src = children[i + 1].src;
+		}
+		children[children.length - 1].src = firstSrc;
 
-                     target[key]-=140;
-                     console.log('clear anim')
-                  }
-               },stepTime)
-            }
+		console.dir(container)
 
-         }
-         function run(){
-            console.dir(container)
-            animation(container,{
-               scrollTop:[0,container.scrollHeight-container.clientHeight]
-            },1)
-            // container.scrollTop = container.scrollHeight;
-            // var length=420;
-            // var time =500;
-            // var step = 420/(time/10);
-            //  setInterval(function(){
-            //    container.scrollTop+=step;
-            //  },10)
 
-         }
-         go.addEventListener('click',run)
-      </script>
 
-   </body>
+
+		function animation(target, action, time=1,count=10) {
+			for (let key in action) {
+				let [from, to] = action[key] 
+				var stepTime = 10;//每一帧占多少毫秒
+				let stepCount =time * 1000 / stepTime//时间(毫秒)/每帧多少毫秒=每一秒多少帧
+				let step = (to - from) / stepCount;//总长度/一秒多少帧=每一帧长度(移动)多少
+	 
+				let accum=0;
+				
+				let timeKey = setInterval(function () {
+					
+					accum+=step;
+					target[key] = accum;
+					if (accum >= to) {
+						stepCount = stepCount*1.01;
+					console.log(stepCount);
+
+						 step = (to - from) / stepCount;
+
+						count--;
+						if(count<=0){
+
+							clearInterval(timeKey);
+						}
+						
+
+						let children = container.children;
+
+						let firstSrc = children[0].src;
+						for (let i = 0; i < children.length - 1; i++) {
+							children[i].src = children[i + 1].src;
+						}
+						children[children.length - 1].src = firstSrc;
+
+						accum -= to;
+						target[key]-=to;
+					}
+				}, stepTime)
+			}
+
+		}
+		function run() {
+			console.dir(container)
+			animation(container, {
+				scrollTop: [0, container.clientHeight]
+			}, 1 )
+			// container.scrollTop = container.scrollHeight;
+			// var length=420;
+			// var time =500;
+			// var step = 420/(time/10);
+			//  setInterval(function(){
+			//    container.scrollTop+=step;
+			//  },10)
+
+		}
+		go.addEventListener('click', run)
+	</script>
+
+</body>
+
 </html>
