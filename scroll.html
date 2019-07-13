@@ -29,111 +29,87 @@
 		var container = document.querySelector('.container')
 		var go = document.querySelector('.go');
 		let children = container.children;
-		// let firstSrc = children[0].src;
-		// for (let i = 0; i < children.length - 1; i++) {
-		// 	children[i].src = children[i + 1].src;
-		// }
-		// children[children.length - 1].src = firstSrc;
-		// console.dir(children)
-		function cycleAnimation(target, action, time, count) {
-			console.log(action);
-			let pictureTime = 10;
+ 
+		function cycleAnimation(target, action, time, count, handle) {
+
 			for (let key in action) {
 				let [from, to] = action[key];
-				let millisecond = time * 1000;
-				let pictureCount = millisecond / pictureTime;
-				let stepLength = (to - from) / millisecond;
+				let distance = to - from;
+				let step = distance / time;
+				let snap = target[key];
 				let startTime = new Date();
-				let timeLength = 0;
-				let snapValue = 0;
-				let timeKey = setInterval(function () {
-					let nowTime = new Date();//现在的时间
-					let timeDiff = nowTime - startTime;//时间差= 上次的时间减现在的时间
-					timeLength += timeDiff;//已经运行了多长时间
-					startTime = nowTime;//修改开始时间点为现在时间
-					console.log(target[key]);
 
-					if (timeLength >= millisecond) {
-						target[key] =from
-						snapValue=0;
-						console.log('target.scrollTop,' ,target[key])
-						timeLength =0;
+				update(function (interval) {
+
+
+					if (interval == 'end') {
+						target[key] = from;
+						snap = from;
+						console.log(count);
 						count--;
 
+						handle();
 
-						let children = container.children;
-						let firstSrc = children[0].src;
-						for (let i = 0; i < children.length - 1; i++) {
-							children[i].src = children[i + 1].src;
-						}
-						children[children.length - 1].src = firstSrc;
-
-						
-						// target[key] -= to - from;
 						if (count <= 0) {
-							clearInterval(timeKey);
+							console.log(new Date() - startTime);
+							return true;
+
+						} else {
+							return false;
 						}
-						console.log('time out')
-					} else {
-						let runLength = timeDiff * stepLength;
-						snapValue += runLength;
-						target[key] = snapValue;
 					}
-				}, pictureTime)
+
+					snap += (interval * step);
+					// console.log(snap);
+					target[key] = snap;
+
+
+
+				}, time);
 			}
 		}
+
+
+		//固定时间内执行完一个动作,最后一帧还无法保证溢出的情况
+		function update(handle, time, interval = 10) {//这里的interval的作用域要了解
+			let flagTime = new Date();
+			let runTime = 0;
+			// let $snap =0;
+			let timeKey = setInterval(function () {
+				let nowTime = new Date();
+				let interval = nowTime - flagTime;
+				// $snap +=interval;
+				runTime += interval;
+				flagTime = nowTime;
+				if (runTime >= time) {
+					if (handle('end')) {
+						// console.log('snap',$snap)//$snap测试了最后一帧的溢出时间的情况
+						clearInterval(timeKey);
+					} else {
+						runTime -= runTime;//这里这样保证了除了最后一帧溢出外,其他不溢出
+					}
+				} else {
+					handle(interval);
+				}
+
+
+			}, interval)
+		}
+  
 		function run() {
 			let count = parseInt(Math.random() * 40 + 20)
 			cycleAnimation(container, {
 				scrollTop: [0, container.clientHeight]
-			}, 10.2574,1);
-			// animation(container, {
-			// 	scrollTop: [0, container.clientHeight]
-			// }, 0.01,50 )
-			// container.scrollTop = container.scrollHeight;
-			// var length=420;
-			// var time =500;
-			// var step = 420/(time/10);
-			//  setInterval(function(){
-			//    container.scrollTop+=step;
-			//  },10)
+			}, 200, count, function () {
+				let firstSrc = children[0].src;
+				for (let i = 0; i < children.length - 1; i++) {
+					children[i].src = children[i + 1].src;
+				}
+				children[children.length - 1].src = firstSrc;
+			});
 		}
 		go.addEventListener('click', run)
-				//这个方法引出了一个异常,为速度过快位置不对,原因在于setInterval的运行时间不是固定的
-				// function animation(target, action, time=1,count=10) {
-				// 	for (let key in action) {
-				// 		let [from, to] = action[key]
-				// 		var stepTime = 10;//每一帧占多少毫秒
-				// 		let stepCount =time * 1000 / stepTime//时间(毫秒)/每帧多少毫秒=每一秒多少帧
-				// 		let step = (to - from) / stepCount;//总长度/一秒多少帧=每一帧长度(移动)多少
-				//
-				// 		let accum=0;
-				//
-				// 		let timeKey = setInterval(function () {
-				//
-				// 			accum+=step;
-				// 			target[key] = accum;
-				// 			if (accum >= to) {
-				// 				stepCount = stepCount*1.01;
-				// 			console.log(stepCount);
-				// 				 step = (to - from) / stepCount;
-				// 				count--;
-				// 				if(count<=0){
-				// 					clearInterval(timeKey);
-				// 				}
-				//
-				// 				let children = container.children;
-				// 				let firstSrc = children[0].src;
-				// 				for (let i = 0; i < children.length - 1; i++) {
-				// 					children[i].src = children[i + 1].src;
-				// 				}
-				// 				children[children.length - 1].src = firstSrc;
-				// 				accum -= to;
-				// 				target[key]-=to;
-				// 			}
-				// 		}, stepTime)
-				// 	}
-				// }
+
 	</script>
 
 </body>
